@@ -1,10 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
-    <RootNamespace>Prog3AT2_Two</RootNamespace>
-    <UseWPF>true</UseWPF>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net5.0-windows</TargetFramework>
+		<RootNamespace>Prog3AT2_Two</RootNamespace>
+		<UseWPF>true</UseWPF>
+		<Company />
+		<Authors>Bradley Willcott</Authors>
+		<Copyright>(c) 2021 Bradley Willcott</Copyright>
+		<ApplicationIcon />
+		<StartupObject></StartupObject>
+	</PropertyGroup>
 
+	<ItemGroup>
+		<ProjectReference Include="..\MyNETCoreLib\MyNETCoreLib.csproj" />
+		<ProjectReference Include="..\MyWpfNETCoreLib\MyWpfNETCoreLib.csproj" />
+	</ItemGroup>
 </Project>

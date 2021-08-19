@@ -49,6 +49,8 @@ namespace ConsoleAppTest
         /// </summary>
         public static void Main()
         {
+            Console.WriteLine("Prog3 AT2 Two\n==============\n");
+
             tree = new AvlTree<string>
             {
                 "Adam Smith",
@@ -63,16 +65,27 @@ namespace ConsoleAppTest
                 "Mary Jones"
             };
 
+            Console.WriteLine("\ntree.Display():\n" +
+                                 "--------------");
             tree.Display();
+
+            Console.WriteLine("\nforeach loop:\n" +
+                                "-------------");
 
             foreach (string item in tree)
             {
                 Console.WriteLine(item);
             }
 
+            Console.WriteLine("\nFindIt():\n" +
+                                "---------");
+
             FindIt("Adam Smith");
             FindIt("Zoro");
             FindIt("Y");
+
+            Console.WriteLine("\nDelete():\n" +
+                                "---------");
 
             if (tree.Delete("Tammy Mills"))
             {
@@ -92,10 +105,14 @@ namespace ConsoleAppTest
                 Console.WriteLine(@"'B' not found!");
             }
 
+            Console.WriteLine("\ntree.Display():\n" +
+                                "---------------");
             tree.Display();
 
             var array = new string[10];
 
+            Console.WriteLine("\nCopyTo(array) and for loop:\n" +
+                                "---------------------------");
             tree.CopyTo(array, 0);
 
             for (int i = 0; i < array.Length; i++)

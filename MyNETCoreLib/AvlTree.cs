@@ -22,6 +22,7 @@ namespace MyNETCoreLib
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Runtime.Serialization;
     using System.Text;
 
     /// <summary>
@@ -31,7 +32,6 @@ namespace MyNETCoreLib
     // (BW) Converted to be a Generic class, and added implementation of:
     // - ICollection<E>
     // - ICollection
-    [Serializable]
     public partial class AvlTree<T> : IList<T>, IList where T : IComparable<T>
     {
         /// <summary>
@@ -67,7 +67,7 @@ namespace MyNETCoreLib
             {
                 foreach (T item in list)
                 {
-                    _ = Add(item);
+                    _ = InternalAdd(item);
                 }
             }
         }
@@ -83,12 +83,14 @@ namespace MyNETCoreLib
         bool IList.IsFixedSize => false;
 
         /// <summary>
-        /// Gets a value indicating whether the <see cref="T:System.Collections.Generic.ICollection`1" /> is read-only.
+        /// Gets a value indicating whether the <see cref="T:System.Collections.Generic.ICollection`1" /> is
+        /// read-only.
         /// </summary>
         bool ICollection<T>.IsReadOnly => false;
 
         /// <summary>
-        /// Gets a value indicating whether the <see cref="T:System.Collections.Generic.ICollection`1" /> is read-only.
+        /// Gets a value indicating whether the <see cref="T:System.Collections.Generic.ICollection`1" /> is
+        /// read-only.
         /// </summary>
         bool IList.IsReadOnly => false;
 
@@ -99,7 +101,8 @@ namespace MyNETCoreLib
         bool ICollection.IsSynchronized => false;
 
         /// <summary>
-        /// Gets an object that can be used to synchronize access to the <see cref="T:System.Collections.ICollection" />.
+        /// Gets an object that can be used to synchronize access to the
+        /// <see cref="T:System.Collections.ICollection" />.
         /// </summary>
         object ICollection.SyncRoot { get; }
 
@@ -115,30 +118,6 @@ namespace MyNETCoreLib
         /// Gets or sets the root node.
         /// </summary>
         protected Node<T> Root { get; set; }
-
-        /// <summary>
-        /// Gets or sets the <see cref="System.Object"/> at the specified index.
-        /// </summary>
-        /// <remarks>
-        /// Due to the implementation requirements of this method, it is strongly advised
-        /// that it NOT be used within a loop of any kind.<br/>
-        /// If you need to iterate through the list, then use <see cref="AvlTree{T}.GetEnumerator"/>
-        /// </remarks>
-        /// <value>
-        /// The <see cref="System.Object"/>.
-        /// </value>
-        /// <param name="index">The index.</param>
-        /// <returns></returns>
-        object IList.this[int index]
-        {
-            get
-            {
-                Console.WriteLine($"IList.this[{index}]");
-                return GetNodeAt(index).Value;
-            }
-
-            set => throw new NotImplementedException();
-        }
 
         /// <summary>
         /// Gets or sets the <see cref="T"/> at the specified index.
@@ -166,6 +145,30 @@ namespace MyNETCoreLib
         }
 
         /// <summary>
+        /// Gets or sets the <see cref="System.Object"/> at the specified index.
+        /// </summary>
+        /// <remarks>
+        /// Due to the implementation requirements of this method, it is strongly advised
+        /// that it NOT be used within a loop of any kind.<br/>
+        /// If you need to iterate through the list, then use <see cref="AvlTree{T}.GetEnumerator"/>
+        /// </remarks>
+        /// <value>
+        /// The <see cref="System.Object"/>.
+        /// </value>
+        /// <param name="index">The index.</param>
+        /// <returns></returns>
+        object IList.this[int index]
+        {
+            get
+            {
+                Console.WriteLine($"IList.this[{index}]");
+                return GetNodeAt(index).Value;
+            }
+
+            set => throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Add new data to tree node and re-balance
         /// uses the Balance_Tree and Rotate methods.
         /// </summary>
@@ -177,38 +180,16 @@ namespace MyNETCoreLib
         /// <returns><c>true</c> unless <paramref name="item"/> is <c>null</c> or a duplicate.</returns>
         public virtual bool Add(T item)
         {
-            var rtn = false;
-
-            if (item != null)
-            {
-                var newItem = new Node<T>(item);
-
-                if (Root == null)
-                {
-                    Root = newItem;
-                    rtn = true;
-                }
-                else
-                {
-                    Root = AddRecursive(Root, newItem, ref rtn);
-                }
-
-                if (rtn)
-                {
-                    Count++;
-                    version++;
-                }
-            }
-
-            Console.WriteLine($"Add({item}) : {rtn}");
-            return rtn;
+            return InternalAdd(item);
         }
 
         /// <summary>
         /// Adds an item to the <see cref="T:System.Collections.Generic.ICollection`1" />.
         /// </summary>
         /// <seealso cref="Add(T)"/>
-        /// <param name="item">The object to add to the <see cref="T:System.Collections.Generic.ICollection`1" />.</param>
+        /// <param name="item">
+        /// The object to add to the <see cref="T:System.Collections.Generic.ICollection`1" />.
+        /// </param>
         void ICollection<T>.Add(T item)
         {
             var rtn = Add(item);
@@ -218,9 +199,12 @@ namespace MyNETCoreLib
         /// <summary>
         /// Adds an item to the <see cref="T:System.Collections.IList" />.
         /// </summary>
-        /// <param name="value">The object to add to the <see cref="T:System.Collections.IList" />.</param>
+        /// <param name="value">
+        /// The object to add to the <see cref="T:System.Collections.IList" />.
+        /// </param>
         /// <returns>
-        /// The position into which the new element was inserted, or -1 to indicate that the item was not inserted into the collection.
+        /// The position into which the new element was inserted, or -1 to indicate that the item was not
+        /// inserted into the collection.
         /// </returns>
         /// <exception cref="System.NotImplementedException"></exception>
         int IList.Add(object value)
@@ -243,7 +227,8 @@ namespace MyNETCoreLib
         /// <summary>
         /// Determines whether this instance contains the object.
         /// </summary>
-        /// <param name="item">The object to locate in the <see cref="T:System.Collections.Generic.ICollection`1" />.</param>
+        /// <param name="item">The object to locate in the
+        /// <see cref="T:System.Collections.Generic.ICollection`1" />.</param>
         /// <returns>
         ///   <see langword="true" /> if <paramref name="item" /> is found in the
         ///   <see cref="T:System.Collections.Generic.ICollection`1" />; otherwise, <see langword="false" />.
@@ -256,9 +241,12 @@ namespace MyNETCoreLib
         /// <summary>
         /// Determines whether this instance contains the object.
         /// </summary>
-        /// <param name="value">The object to locate in the <see cref="T:System.Collections.IList" />.</param>
+        /// <param name="value">
+        /// The object to locate in the <see cref="T:System.Collections.IList" />.
+        /// </param>
         /// <returns>
-        ///   <see langword="true" /> if the <see cref="T:System.Object" /> is found in the <see cref="T:System.Collections.IList" />; otherwise, <see langword="false" />.
+        ///   <see langword="true" /> if the <see cref="T:System.Object" /> is found in the
+        ///   <see cref="T:System.Collections.IList" />; otherwise, <see langword="false" />.
         /// </returns>
         /// <exception cref="System.NotImplementedException"></exception>
         bool IList.Contains(object value)
@@ -316,10 +304,13 @@ namespace MyNETCoreLib
         /// Copies the elements of the <see cref="T:System.Collections.ICollection" /> to an
         /// <see cref="T:System.Array" />, starting at a particular <see cref="T:System.Array" /> index.
         /// </summary>
-        /// <param name="array">The one-dimensional <see cref="T:System.Array" /> that is the destination of
+        /// <param name="array">
+        /// The one-dimensional <see cref="T:System.Array" /> that is the destination of
         /// the elements copied from <see cref="T:System.Collections.ICollection" />.
         /// The <see cref="T:System.Array" /> must have zero-based indexing.</param>
-        /// <param name="index">The zero-based index in <paramref name="array" /> at which copying begins.</param>
+        /// <param name="index">
+        /// The zero-based index in <paramref name="array" /> at which copying begins.
+        /// </param>
         void ICollection.CopyTo(Array array, int index)
         {
             Console.WriteLine($"ICollection.CopyTo({array}, {index})");
@@ -351,8 +342,9 @@ namespace MyNETCoreLib
             }
             else
             {
-                // No need to use reflection to verify that the types are compatible because it isn't 100% correct and we can rely
-                // on the runtime validation during the cast that happens below (i.e. we will get an ArrayTypeMismatchException).
+                // No need to use reflection to verify that the types are compatible because it isn't
+                // 100% correct and we can rely on the runtime validation during the cast that happens
+                // below (i.e. we will get an ArrayTypeMismatchException).
                 if (array is object[] objects)
                 {
                     try
@@ -381,8 +373,10 @@ namespace MyNETCoreLib
         /// Delete the <paramref name="target"/> from the tree.
         /// </summary>
         /// <param name="target">The target<see cref="string"/>.</param>
-        /// <returns><c>true</c> unless <paramref name="target"/> is <c>null</c>, or <paramref name="target"/>
-        /// is not found.</returns>
+        /// <returns>
+        /// <c>true</c> unless <paramref name="target"/> is <c>null</c>, or <paramref name="target"/>
+        /// is not found.
+        /// </returns>
         public virtual bool Delete(T target)
         {
             var rtn = false;
@@ -445,7 +439,8 @@ namespace MyNETCoreLib
         /// Returns an enumerator that iterates through a collection.
         /// </summary>
         /// <returns>
-        /// An <see cref="T:System.Collections.IEnumerator" /> object that can be used to iterate through the collection.
+        /// An <see cref="T:System.Collections.IEnumerator" /> object that can be used to iterate through
+        /// the collection.
         /// </returns>
         /// <exception cref="System.NotImplementedException"></exception>
         IEnumerator IEnumerable.GetEnumerator()
@@ -455,9 +450,11 @@ namespace MyNETCoreLib
         }
 
         /// <summary>
-        /// Determines the index of a specific item in the <see cref="T:System.Collections.Generic.IList`1" />.
+        /// Determines the index of a specific item in the
+        /// <see cref="T:System.Collections.Generic.IList`1" />.
         /// </summary>
-        /// <param name="item">The object to locate in the <see cref="T:System.Collections.Generic.IList`1" />.</param>
+        /// <param name="item">The object to locate in the
+        /// <see cref="T:System.Collections.Generic.IList`1" />.</param>
         /// <returns>
         /// The index of <paramref name="item" /> if found in the list; otherwise, -1.
         /// </returns>
@@ -475,7 +472,9 @@ namespace MyNETCoreLib
         /// <summary>
         /// Determines the index of a specific item in the <see cref="T:System.Collections.IList" />.
         /// </summary>
-        /// <param name="value">The object to locate in the <see cref="T:System.Collections.IList" />.</param>
+        /// <param name="value">
+        /// The object to locate in the <see cref="T:System.Collections.IList" />.
+        /// </param>
         /// <returns>
         /// The index of <paramref name="value" /> if found in the list; otherwise, -1.
         /// </returns>
@@ -488,10 +487,15 @@ namespace MyNETCoreLib
         }
 
         /// <summary>
-        /// Inserts an item to the <see cref="T:System.Collections.Generic.IList`1" /> at the specified index.
+        /// Inserts an item to the <see cref="T:System.Collections.Generic.IList`1" /> at the specified
+        /// index.
         /// </summary>
-        /// <param name="index">The zero-based index at which <paramref name="item" /> should be inserted.</param>
-        /// <param name="item">The object to insert into the <see cref="T:System.Collections.Generic.IList`1" />.</param>
+        /// <param name="index">
+        /// The zero-based index at which <paramref name="item" /> should be inserted.
+        /// </param>
+        /// <param name="item">
+        /// The object to insert into the <see cref="T:System.Collections.Generic.IList`1" />.
+        /// </param>
         /// <exception cref="System.NotImplementedException"></exception>
         public void Insert(int index, T item)
         {
@@ -501,8 +505,12 @@ namespace MyNETCoreLib
         /// <summary>
         /// Inserts an item to the <see cref="T:System.Collections.IList" /> at the specified index.
         /// </summary>
-        /// <param name="index">The zero-based index at which <paramref name="value" /> should be inserted.</param>
-        /// <param name="value">The object to insert into the <see cref="T:System.Collections.IList" />.</param>
+        /// <param name="index">
+        /// The zero-based index at which <paramref name="value" /> should be inserted.
+        /// </param>
+        /// <param name="value">
+        /// The object to insert into the <see cref="T:System.Collections.IList" />.
+        /// </param>
         /// <exception cref="System.NotImplementedException"></exception>
         void IList.Insert(int index, object value)
         {
@@ -513,12 +521,14 @@ namespace MyNETCoreLib
         /// Removes the first occurrence of a specific object from the
         /// <see cref="T:System.Collections.Generic.ICollection`1" />.
         /// </summary>
-        /// <param name="item">The object to remove from the <see cref="T:System.Collections.Generic.ICollection`1" />.</param>
+        /// <param name="item">
+        /// The object to remove from the <see cref="T:System.Collections.Generic.ICollection`1" />.
+        /// </param>
         /// <returns>
         ///   <see langword="true" /> if <paramref name="item" /> was successfully removed from the
         ///   <see cref="T:System.Collections.Generic.ICollection`1" />; otherwise, <see langword="false" />.
-        ///   This method also returns <see langword="false" /> if <paramref name="item" /> is not found in the original
-        ///   <see cref="T:System.Collections.Generic.ICollection`1" />.
+        ///   This method also returns <see langword="false" /> if <paramref name="item" /> is not found
+        ///   in the original <see cref="T:System.Collections.Generic.ICollection`1" />.
         /// </returns>
         /// <exception cref="System.NotImplementedException"></exception>
         public bool Remove(T item)
@@ -528,9 +538,12 @@ namespace MyNETCoreLib
         }
 
         /// <summary>
-        /// Removes the first occurrence of a specific object from the <see cref="T:System.Collections.IList" />.
+        /// Removes the first occurrence of a specific object from the
+        /// <see cref="T:System.Collections.IList" />.
         /// </summary>
-        /// <param name="value">The object to remove from the <see cref="T:System.Collections.IList" />.</param>
+        /// <param name="value">
+        /// The object to remove from the <see cref="T:System.Collections.IList" />.
+        /// </param>
         /// <exception cref="System.NotImplementedException"></exception>
         void IList.Remove(object value)
         {
@@ -675,7 +688,7 @@ namespace MyNETCoreLib
 
                 if (index != Count - 1)
                 {
-                    throw new Exception($"Re-indexing has failed: Count({Count}), index({index})");
+                    throw new ReindexFailedException($"Re-indexing has failed: Count({Count}), index({index})");
                 }
             }
         }
@@ -685,7 +698,9 @@ namespace MyNETCoreLib
         /// </summary>
         /// <param name="current">The current<see cref="Node"/>.</param>
         /// <param name="node">The n<see cref="Node"/>.</param>
-        /// <param name="added"><see langword="true" /> if successful, <see langword="false" /> if already exists.</param>
+        /// <param name="added">
+        /// <see langword="true" /> if successful, <see langword="false" /> if already exists.
+        /// </param>
         /// <returns>The <see cref="Node"/>.</returns>
         private static Node<T> AddRecursive(Node<T> current, Node<T> node, ref bool added)
         {
@@ -952,12 +967,12 @@ namespace MyNETCoreLib
         /// Gets the <see cref="avl_tree.AvlTree{T}.Node{T}"/> at <paramref name="index"/>.
         /// </summary>
         /// <param name="index">The index to search for.</param>
-        /// <returns>The <see cref="avl_tree.AvlTree{T}.Node{T}"/> if found, <see langword="null"/> otherwise.</returns>
+        /// <returns>
+        /// The <see cref="avl_tree.AvlTree{T}.Node{T}"/> if found, <see langword="null"/> otherwise.
+        /// </returns>
         /// <exception cref="System.ArgumentOutOfRangeException">index</exception>
         private Node<T> GetNodeAt(int index)
         {
-            //Console.WriteLine($"GetNodeAt({index})");
-
             if (index < 0 || index >= Count)
             {
                 throw new ArgumentOutOfRangeException(nameof(index));
@@ -965,7 +980,44 @@ namespace MyNETCoreLib
 
             ReIndex();
             var rtn = FindIndexRecursive(index, Root);
-            //Console.WriteLine($"[{rtn.Index}] {rtn.Value}");
+            return rtn;
+        }
+
+        /// <summary>
+        /// This is used to add an <paramref name="item"/> to the tree.
+        /// </summary>
+        /// <remarks>
+        /// The reason it has been pulled out of the public method, is to allow constructor access
+        /// to it, as the public method is a virtual one.
+        /// </remarks>
+        /// <param name="item">The item.</param>
+        /// <returns></returns>
+        private bool InternalAdd(T item)
+        {
+            var rtn = false;
+
+            if (item != null)
+            {
+                var newItem = new Node<T>(item);
+
+                if (Root == null)
+                {
+                    Root = newItem;
+                    rtn = true;
+                }
+                else
+                {
+                    Root = AddRecursive(Root, newItem, ref rtn);
+                }
+
+                if (rtn)
+                {
+                    Count++;
+                    version++;
+                }
+            }
+
+            Console.WriteLine($"Add({item}) : {rtn}");
             return rtn;
         }
     }

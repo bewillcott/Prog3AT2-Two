@@ -31,10 +31,10 @@ namespace MyNETCoreLib
             /// <summary>
             /// Initializes a new instance of the <see cref="Node"/> class.
             /// </summary>
-            /// <param name="data">The data<see cref="string"/>.</param>
-            public Node(E data)
+            /// <param name="value">The value<see cref="string"/>.</param>
+            public Node(E value)
             {
-                this.Value = data;
+                this.Value = value;
             }
 
             /// <summary>
